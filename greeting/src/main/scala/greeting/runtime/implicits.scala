@@ -15,30 +15,27 @@
  */
 
 package freestyle.rpc.demo
-package greeting
+package greeting.runtime
 
-import io.grpc.{Server, ServerBuilder, ServerServiceDefinition}
+import freestyle._
+import freestyle.implicits._
+import freestyle.rpc.demo.greeting._
+import freestyle.rpc.server._
+import freestyle.rpc.server.implicits._
+import freestyle.rpc.server.handlers._
 
-class GrpcServer(serverServiceDefinition: ServerServiceDefinition) {
+import scala.concurrent.{ExecutionContext, Future}
 
-  var server: Option[Server] = None
+object implicits {
 
-  def start(): Unit = {
-    server = Option(
-      ServerBuilder
-        .forPort(port)
-        .addService(serverServiceDefinition)
-        .build
-        .start
-    )
+  implicit val config: Config       = Config(portNode1)
+  implicit val ec: ExecutionContext = ExecutionContext.Implicits.global
 
-    Runtime.getRuntime.addShutdownHook(new Thread() {
-      override def run(): Unit = stopServer()
-    })
-  }
+  implicit val grpcConfigs: List[GrpcConfig] = List(
+    AddService(GreeterGrpc.bindService(new GreetingService, ec))
+  )
 
-  def stopServer(): Unit = server.foreach(_.shutdown())
+  implicit val grpcServerHandler =
+    new GrpcServerHandler[Future] andThen new GrpcConfigInterpreter[Future]
 
-  def blockUntilShutdown(): Unit =
-    server.foreach(_.awaitTermination())
 }
