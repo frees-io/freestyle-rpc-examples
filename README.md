@@ -20,13 +20,13 @@ Simple demo using `.proto` files + [ScalaPB](https://scalapb.github.io/).
 Run server:
 
 ```
-sbt runServer
+sbt runGreetingServer
 ```
 
 Run client:
 
 ```
-sbt runClient
+sbt runGreetingClient
 ```
 
 ## ProtocolGen Demo
@@ -36,13 +36,13 @@ Same example as above but just using scala annotations to define services and pr
 Run server:
 
 ```
-sbt runS
+sbt runProtoGenServer
 ```
 
 Run client:
 
 ```
-sbt runC
+sbt runProtoGenClient
 ```
 
 ## Http/User Demo
