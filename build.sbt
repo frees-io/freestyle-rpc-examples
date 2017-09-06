@@ -2,7 +2,7 @@ lazy val root = project
   .in(file("."))
   .settings(name := "freestyle-rpc-examples")
   .settings(moduleName := "root")
-  .aggregate(`demo-greeting`, `demo-protocolgen`)
+  .aggregate(`demo-greeting`, `demo-protocolgen`, `demo-routeguide`)
 
 lazy val `third-party` = project
   .in(file("third_party"))
@@ -24,4 +24,9 @@ lazy val `demo-http` = project
 lazy val `demo-protocolgen` = project
   .in(file("protocolgen"))
   .settings(moduleName := "demo-protocolgen")
+  .settings(protoGenTaskSettings: _*)
+
+lazy val `demo-routeguide` = project
+  .in(file("routeguide"))
+  .settings(moduleName := "demo-routeguide")
   .settings(protoGenTaskSettings: _*)
