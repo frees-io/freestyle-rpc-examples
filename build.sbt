@@ -30,3 +30,4 @@ lazy val `demo-routeguide` = project
   .in(file("routeguide"))
   .settings(moduleName := "demo-routeguide")
   .settings(protoGenTaskSettings: _*)
+  .settings(libraryDependencies ++= circeDeps)

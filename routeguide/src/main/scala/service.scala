@@ -58,7 +58,7 @@ object protocols {
   case class Feature(name: String, location: Point)
 
   /**
-   * Not used in the RPC.  Instead, this is here for the form serialized to disk.
+   * Not used in the RPC. Instead, this is here for the form serialized to disk.
    * @param feature Feature.
    */
   @message
@@ -90,7 +90,7 @@ object protocols {
   @free
   @service
   @debug
-  trait GreetingService {
+  trait RouteGuideService {
 
     /**
      * A simple RPC.

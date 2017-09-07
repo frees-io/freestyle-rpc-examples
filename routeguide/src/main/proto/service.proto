@@ -35,11 +35,10 @@ message RouteSummary {
    int32 elapsed_time = 4;
 }
            
-service GreetingService {
+service RouteGuideService {
    rpc getFeature (Point) returns (Feature) {}
    rpc listFeatures (Rectangle) returns (stream Feature) {}
    rpc recordRoute (stream Point) returns (RouteSummary) {}
    rpc routeChat (stream RouteNote) returns (stream RouteNote) {}
 }
-           
            

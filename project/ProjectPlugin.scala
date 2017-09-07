@@ -12,7 +12,14 @@ object ProjectPlugin extends AutoPlugin {
     object V {
       lazy val frees    = "0.3.1"
       lazy val freesRPC = "0.0.2-SNAPSHOT"
+      lazy val circe    = "0.8.0"
     }
+
+    val circeDeps: Seq[ModuleID] = Seq(
+      "io.circe" %% "circe-core",
+      "io.circe" %% "circe-generic",
+      "io.circe" %% "circe-parser"
+    ).map(_ % V.circe)
 
     lazy val GOPATH: String = Option(sys.props("go.path")).getOrElse("/your/go/path")
 
