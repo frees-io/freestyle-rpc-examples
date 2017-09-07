@@ -11,7 +11,7 @@ object ProjectPlugin extends AutoPlugin {
 
     object V {
       lazy val frees    = "0.3.1"
-      lazy val freesRPC = "0.0.1"
+      lazy val freesRPC = "0.0.2-SNAPSHOT"
     }
 
     lazy val GOPATH: String = Option(sys.props("go.path")).getOrElse("/your/go/path")

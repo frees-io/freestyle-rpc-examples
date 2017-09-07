@@ -1,0 +1,45 @@
+syntax = "proto3";
+
+option java_package = "routeguide";
+option java_multiple_files = true;
+option java_outer_classname = "RouteGuide";
+
+message Point {
+   int32 latitude = 1;
+   int32 longitude = 2;
+}
+           
+message Rectangle {
+   Point lo = 1;
+   Point hi = 2;
+}
+           
+message Feature {
+   string name = 1;
+   Point location = 2;
+}
+           
+message FeatureDatabase {
+   repeated Feature feature = 1;
+}
+           
+message RouteNote {
+   Point location = 1;
+   string message = 2;
+}
+           
+message RouteSummary {
+   int32 point_count = 1;
+   int32 feature_count = 2;
+   int32 distance = 3;
+   int32 elapsed_time = 4;
+}
+           
+service GreetingService {
+   rpc getFeature (Point) returns (Feature) {}
+   rpc listFeatures (Rectangle) returns (stream Feature) {}
+   rpc recordRoute (stream Point) returns (RouteSummary) {}
+   rpc routeChat (stream RouteNote) returns (stream RouteNote) {}
+}
+           
+           
