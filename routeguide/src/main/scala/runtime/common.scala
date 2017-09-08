@@ -17,12 +17,31 @@
 package routeguide
 package runtime
 
+import routeguide.protocols.{Feature, FeatureDatabase}
+import routeguide.codecs._
+
 import scala.concurrent.ExecutionContext
+import scala.io.Source
 
 trait CommonImplicits {
 
   implicit val ec: ExecutionContext = ExecutionContext.Implicits.global
   implicit val S: monix.execution.Scheduler =
     monix.execution.Scheduler.Implicits.global
+
+}
+
+object common extends CommonImplicits {
+
+  val features: List[Feature] =
+    io.circe.parser.decode[FeatureDatabase](
+      Source
+        .fromInputStream(getClass.getClassLoader.getResourceAsStream("route_guide_db.json"))
+        .mkString) match {
+      case Right(fList) => fList.feature
+      case Left(e) =>
+        println(s"Decoding failure: $e")
+        throw e
+    }
 
 }
