@@ -37,7 +37,12 @@ object ClientApp {
 
   def clientApp[M[_]](implicit APP: RouteGuideClient[M]): FreeS[M, Unit] = {
     for {
+      // Looking for a valid feature
       _ <- APP.getFeature(409146138, -746188906)
+      // Feature missing.
+      _ <- APP.getFeature(0, 0)
+      // Looking for features between 40, -75 and 42, -73.
+      _ <- APP.listFeatures(400000000, -750000000, 420000000, -730000000)
     } yield ()
   }
 
