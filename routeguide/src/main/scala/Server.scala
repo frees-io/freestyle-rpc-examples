@@ -17,8 +17,9 @@
 package routeguide
 
 import cats.implicits._
-import freestyle.rpc.server.GrpcServer
+import freestyle.rpc.server.GrpcServerApp
 import freestyle.rpc.server.implicits._
+import journal.Logger
 import routeguide.runtime.server.implicits._
 
 import scala.concurrent.Await
@@ -26,7 +27,13 @@ import scala.concurrent.duration.Duration
 
 object Server {
 
-  def main(args: Array[String]): Unit =
-    Await.result(server[GrpcServer.Op].bootstrapFuture, Duration.Inf)
+  val logger: Logger = Logger[this.type]
+
+  def main(args: Array[String]): Unit = {
+
+    logger.info(s"Server is starting, listening on ${conf.port}")
+
+    Await.result(server[GrpcServerApp.Op].bootstrapFuture, Duration.Inf)
+  }
 
 }

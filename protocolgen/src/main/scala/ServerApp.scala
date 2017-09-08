@@ -19,7 +19,7 @@ package demo
 package protocolgen
 
 import cats.implicits._
-import freestyle.rpc.server.GrpcServer
+import freestyle.rpc.server._
 import freestyle.rpc.server.implicits._
 import freestyle.rpc.demo.protocolgen.runtime.server.implicits._
 
@@ -29,6 +29,6 @@ import scala.concurrent.duration.Duration
 object ServerApp {
 
   def main(args: Array[String]): Unit =
-    Await.result(server[GrpcServer.Op].bootstrapFuture, Duration.Inf)
+    Await.result(server[GrpcServerApp.Op].bootstrapFuture, Duration.Inf)
 
 }

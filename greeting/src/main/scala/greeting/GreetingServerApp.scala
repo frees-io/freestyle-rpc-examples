@@ -18,7 +18,7 @@ package freestyle.rpc.demo
 package greeting
 
 import cats.implicits._
-import freestyle.rpc.server._
+import freestyle.rpc.server.GrpcServerApp
 import freestyle.rpc.server.implicits._
 import runtime.server.implicits._
 
@@ -28,5 +28,5 @@ import scala.concurrent.Await
 object GreetingServerApp {
 
   def main(args: Array[String]): Unit =
-    Await.result(server[GrpcServer.Op].bootstrapFuture, Duration.Inf)
+    Await.result(server[GrpcServerApp.Op].bootstrapFuture, Duration.Inf)
 }

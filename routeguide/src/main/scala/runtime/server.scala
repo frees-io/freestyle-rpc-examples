@@ -18,7 +18,10 @@ package routeguide
 package runtime
 
 import cats.{~>, Comonad}
+import freestyle.logging.LoggingM
+import freestyle.module
 import freestyle.rpc.server._
+import monix.eval.Task
 import routeguide.protocols._
 import routeguide.runtime.handlers.RouteGuideServiceHandler
 
@@ -45,6 +48,10 @@ object server {
           fa.map(f)
       }
 
+    implicit val task2Future: Task ~> Future = new (Task ~> Future) {
+      override def apply[A](fa: Task[A]): Future[A] = fa.runAsync
+    }
+
   }
 
   trait Config extends Instances {
@@ -54,7 +61,7 @@ object server {
     import freestyle.config.implicits._
 
     implicit val routeGuideServiceHandler: RouteGuideService.Handler[Future] =
-      new RouteGuideServiceHandler
+      new RouteGuideServiceHandler[Future]
 
     val grpcConfigs: List[GrpcConfig] = List(
       AddService(RouteGuideService.bindService[RouteGuideService.Op, Future])

@@ -3,24 +3,31 @@ package runtime.handlers
 
 import java.util.concurrent.atomic.AtomicReference
 
+import cats.~>
+import freestyle.Capture
+import freestyle.logging.LoggingM
+import journal.Logger
+import monix.eval.Task
 import monix.reactive.Observable
 import routeguide.protocols._
 import routeguide.runtime.common._
 
-import scala.concurrent.Future
 import scala.concurrent.duration.NANOSECONDS
 
-class RouteGuideServiceHandler extends RouteGuideService.Handler[Future] {
+class RouteGuideServiceHandler[F[_]](implicit C: Capture[F], T2F: Task ~> F)
+    extends RouteGuideService.Handler[F] {
 
   // AtomicReference as an alternative to ConcurrentMap<Point, List<RouteNote>>?
   private val routeNotes: AtomicReference[Map[Point, List[RouteNote]]] =
     new AtomicReference[Map[Point, List[RouteNote]]](Map.empty)
 
-  override protected[this] def getFeature(point: protocols.Point): Future[Feature] =
-    Future.successful(point.findFeatureIn(features))
+  val logger: Logger = Logger[this.type]
+
+  override protected[this] def getFeature(point: protocols.Point): F[Feature] =
+    C.capture(point.findFeatureIn(features))
 
   override protected[this] def listFeatures(
-      rectangle: protocols.Rectangle): Future[Observable[Feature]] = {
+      rectangle: protocols.Rectangle): F[Observable[Feature]] = {
     val left   = Math.min(rectangle.lo.longitude, rectangle.hi.longitude)
     val right  = Math.max(rectangle.lo.longitude, rectangle.hi.longitude)
     val top    = Math.max(rectangle.lo.latitude, rectangle.hi.latitude)
@@ -35,37 +42,51 @@ class RouteGuideServiceHandler extends RouteGuideService.Handler[Future] {
       }
     )
 
-    Future.successful(observable)
+    C.capture(observable)
   }
 
-  override protected[this] def recordRoute(
-      points: Observable[protocols.Point]): Future[RouteSummary] = {
-    points
-      .foldLeftL((RouteSummary(0, 0, 0, 0), None: Option[Point], System.nanoTime())) {
-        case ((routeSummary, previous, startTime), point) =>
-          // For each point after the first, add the incremental distance from the previous point to
-          // the total distance value.
-          val counter  = if (point.findFeatureIn(features).valid) 1 else 0
-          val distance = previous.map(calcDistance(_, point)) getOrElse 0
-          val updatedRouteSummary: RouteSummary = routeSummary.copy(
-            point_count = routeSummary.point_count + 1,
-            feature_count = routeSummary.feature_count + counter,
-            distance = routeSummary.distance + distance,
-            elapsed_time = NANOSECONDS.toSeconds(System.nanoTime() - startTime).toInt
-          )
-          (updatedRouteSummary, Some(point), startTime)
-      }
-      .map(_._1)
-      .runAsync
+  override protected[this] def recordRoute(points: Observable[protocols.Point]): F[RouteSummary] = {
+
+    // For each point after the first, add the incremental distance from the previous point to
+    // the total distance value. We're starting
+
+    // We have to applyApplies a binary operator to a start value and all elements of
+    // the source, going left to right and returns a new `Task` that
+    // upon evaluation will eventually emit the final result.
+    T2F.apply(
+      points
+        .foldLeftL((RouteSummary(0, 0, 0, 0), None: Option[Point], System.nanoTime())) {
+          case ((routeSummary, previous, startTime), point) =>
+            val counter  = if (point.findFeatureIn(features).valid) 1 else 0
+            val distance = previous.map(calcDistance(_, point)) getOrElse 0
+            val updatedRouteSummary: RouteSummary = routeSummary.copy(
+              point_count = routeSummary.point_count + 1,
+              feature_count = routeSummary.feature_count + counter,
+              distance = routeSummary.distance + distance,
+              elapsed_time = NANOSECONDS.toSeconds(System.nanoTime() - startTime).toInt
+            )
+            (updatedRouteSummary, Some(point), startTime)
+        }
+        .map(_._1)
+        .onErrorHandle { e =>
+          logger.warn("recordRoute cancelled", e)
+          throw e
+        }
+    )
   }
 
   override protected[this] def routeChat(
-      routeNotes: Observable[protocols.RouteNote]): Future[Observable[RouteNote]] =
-    Future.successful {
-      routeNotes flatMap { note =>
-        addNote(note)
-        Observable.fromIterable(getOrCreateNotes(note.location))
-      }
+      routeNotes: Observable[protocols.RouteNote]): F[Observable[RouteNote]] =
+    C.capture {
+      routeNotes
+        .flatMap { note: RouteNote =>
+          addNote(note)
+          Observable.fromIterable(getOrCreateNotes(note.location))
+        }
+        .onErrorHandle { e =>
+          logger.warn("routeChat cancelled", e)
+          throw e
+        }
     }
 
   private[this] def addNote(note: RouteNote): Unit =

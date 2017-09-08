@@ -11,7 +11,7 @@ object ProjectPlugin extends AutoPlugin {
 
     object V {
       lazy val frees    = "0.3.1"
-      lazy val freesRPC = "0.0.2-SNAPSHOT"
+      lazy val freesRPC = "0.0.2"
       lazy val circe    = "0.8.0"
     }
 
@@ -101,11 +101,12 @@ object ProjectPlugin extends AutoPlugin {
       Resolver.bintrayRepo("beyondthelines", "maven")
     ),
     libraryDependencies ++= Seq(
-      "io.frees" %% "freestyle"        % V.frees,
-      "io.frees" %% "freestyle-async"  % V.frees,
-      "io.frees" %% "freestyle-config" % V.frees,
-      "io.frees" %% "frees-rpc"        % V.freesRPC,
-      "io.grpc"  % "grpc-netty"        % cv.grpcJavaVersion
+      "io.frees" %% "freestyle"         % V.frees,
+      "io.frees" %% "freestyle-async"   % V.frees,
+      "io.frees" %% "freestyle-config"  % V.frees,
+      "io.frees" %% "freestyle-logging" % V.frees,
+      "io.frees" %% "frees-rpc"         % V.freesRPC,
+      "io.grpc"  % "grpc-netty"         % cv.grpcJavaVersion
     )
   )
 
