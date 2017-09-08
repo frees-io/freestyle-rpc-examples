@@ -5,7 +5,6 @@ import java.util.concurrent.atomic.AtomicReference
 
 import cats.~>
 import freestyle.Capture
-import freestyle.logging.LoggingM
 import journal.Logger
 import monix.eval.Task
 import monix.reactive.Observable
@@ -24,7 +23,10 @@ class RouteGuideServiceHandler[F[_]](implicit C: Capture[F], T2F: Task ~> F)
   val logger: Logger = Logger[this.type]
 
   override protected[this] def getFeature(point: protocols.Point): F[Feature] =
-    C.capture(point.findFeatureIn(features))
+    C.capture {
+      logger.info(s"Fetching feature at ${point.pretty} ...")
+      point.findFeatureIn(features)
+    }
 
   override protected[this] def listFeatures(
       rectangle: protocols.Rectangle): F[Observable[Feature]] = {

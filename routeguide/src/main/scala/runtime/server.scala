@@ -48,10 +48,6 @@ object server {
           fa.map(f)
       }
 
-    implicit val task2Future: Task ~> Future = new (Task ~> Future) {
-      override def apply[A](fa: Task[A]): Future[A] = fa.runAsync
-    }
-
   }
 
   trait Config extends Instances {

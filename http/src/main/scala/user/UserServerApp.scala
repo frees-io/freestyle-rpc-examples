@@ -28,5 +28,5 @@ import scala.concurrent.Await
 object UserServerApp {
 
   def main(args: Array[String]): Unit =
-    Await.result(server[GrpcServer.Op].bootstrapFuture, Duration.Inf)
+    Await.result(server[GrpcServerApp.Op].bootstrapFuture, Duration.Inf)
 }

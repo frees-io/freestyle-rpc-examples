@@ -11,7 +11,7 @@ object ProjectPlugin extends AutoPlugin {
 
     object V {
       lazy val frees    = "0.3.1"
-      lazy val freesRPC = "0.0.2"
+      lazy val freesRPC = "0.0.3-SNAPSHOT"
       lazy val circe    = "0.8.0"
     }
 
@@ -88,7 +88,13 @@ object ProjectPlugin extends AutoPlugin {
         ";project demo-protocolgen;runMain freestyle.rpc.demo.protocolgen.ServerApp") ++
       addCommandAlias(
         "runProtoGenClient",
-        ";project demo-protocolgen;runMain freestyle.rpc.demo.protocolgen.ClientApp")
+        ";project demo-protocolgen;runMain freestyle.rpc.demo.protocolgen.ClientApp") ++
+      addCommandAlias(
+        "runRouteGuideServer",
+        ";project demo-routeguide;runMain routeguide.ServerApp") ++
+      addCommandAlias(
+        "runRouteGuideClient",
+        ";project demo-routeguide;runMain routeguide.ClientApp")
 
   lazy val demoCommonSettings = Seq(
     name := "freestyle-rpc-examples",

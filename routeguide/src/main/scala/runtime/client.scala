@@ -17,4 +17,56 @@
 package routeguide
 package runtime
 
-object client {}
+import cats.implicits._
+import freestyle._
+import freestyle.implicits._
+import freestyle.async.implicits._
+import freestyle.config.implicits._
+import freestyle.rpc.client._
+import freestyle.rpc.client.implicits._
+import freestyle.rpc.client.handlers._
+import cats.~>
+import io.grpc.ManagedChannel
+import routeguide.protocols.RouteGuideService
+import routeguide.runtime.handlers.RouteGuideClientHandler
+
+import scala.concurrent.{Await, Future}
+import scala.util.{Failure, Success, Try}
+
+object client {
+
+  trait Config {
+
+    val channelFor: ManagedChannelFor =
+      ConfigForAddress[ChannelConfig.Op]("rpc.client.host", "rpc.client.port")
+        .interpret[Try] match {
+        case Success(c) => c
+        case Failure(e) =>
+          e.printStackTrace()
+          throw new RuntimeException("Unable to load the client configuration", e)
+      }
+
+    val channelConfigList: List[ManagedChannelConfig] = List(UsePlaintext(true))
+
+  }
+
+  trait Implicits extends CommonImplicits with Config {
+
+    val managedChannelInterpreter =
+      new ManagedChannelInterpreter[Future](channelFor, channelConfigList)
+
+    implicit def channelMHandler[F[_]]: ChannelM.Op ~> Future =
+      new ChannelMHandler[Future] andThen managedChannelInterpreter
+
+    val channel: ManagedChannel = managedChannelInterpreter.build(channelFor, channelConfigList)
+
+    implicit val routeGuideServiceClient: RouteGuideService.Client[Future] =
+      RouteGuideService.client[Future](channel)
+
+    implicit val routeGuideClientHandler: RouteGuideClientHandler[Future] =
+      new RouteGuideClientHandler[Future]
+  }
+
+  object implicits extends Implicits
+
+}

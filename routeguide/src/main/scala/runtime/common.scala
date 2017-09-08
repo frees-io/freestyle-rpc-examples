@@ -17,10 +17,12 @@
 package routeguide
 package runtime
 
+import cats.~>
+import monix.eval.Task
 import routeguide.protocols.{Feature, FeatureDatabase}
 import routeguide.codecs._
 
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 import scala.io.Source
 
 trait CommonImplicits {
@@ -28,6 +30,10 @@ trait CommonImplicits {
   implicit val ec: ExecutionContext = ExecutionContext.Implicits.global
   implicit val S: monix.execution.Scheduler =
     monix.execution.Scheduler.Implicits.global
+
+  implicit val task2Future: Task ~> Future = new (Task ~> Future) {
+    override def apply[A](fa: Task[A]): Future[A] = fa.runAsync
+  }
 
 }
 

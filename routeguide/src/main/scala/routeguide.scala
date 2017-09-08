@@ -33,6 +33,8 @@ package object routeguide {
         .find(f =>
           f.location.latitude == location.latitude && f.location.longitude == location.longitude)
         .getOrElse(Feature(name = "", location = location))
+
+    def pretty: String = s"[$getLatitude, $getLongitude]"
   }
 
   final class FeatureOps(feature: Feature) {

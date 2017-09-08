@@ -25,13 +25,13 @@ import routeguide.runtime.server.implicits._
 import scala.concurrent.Await
 import scala.concurrent.duration.Duration
 
-object Server {
+object ServerApp {
 
   val logger: Logger = Logger[this.type]
 
   def main(args: Array[String]): Unit = {
 
-    logger.info(s"Server is starting, listening on ${conf.port}")
+    logger.info(s"Server is starting ...")
 
     Await.result(server[GrpcServerApp.Op].bootstrapFuture, Duration.Inf)
   }
