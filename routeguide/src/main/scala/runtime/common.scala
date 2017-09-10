@@ -18,6 +18,7 @@ package routeguide
 package runtime
 
 import cats.~>
+import journal.Logger
 import monix.eval.Task
 import routeguide.protocols.{Feature, FeatureDatabase}
 import routeguide.codecs._
@@ -27,12 +28,21 @@ import scala.io.Source
 
 trait CommonImplicits {
 
+  val logger: Logger = Logger[this.type]
+
   implicit val ec: ExecutionContext = ExecutionContext.Implicits.global
   implicit val S: monix.execution.Scheduler =
     monix.execution.Scheduler.Implicits.global
 
   implicit val task2Future: Task ~> Future = new (Task ~> Future) {
-    override def apply[A](fa: Task[A]): Future[A] = fa.runAsync
+    override def apply[A](fa: Task[A]): Future[A] = {
+      logger.info("Running the Task as Future...")
+      fa.runAsync.recover {
+        case e: Throwable =>
+          logger.error(s"An error has occurred running Task to Future", e)
+          throw e
+      }
+    }
   }
 
 }

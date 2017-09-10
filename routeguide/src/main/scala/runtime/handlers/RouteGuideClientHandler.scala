@@ -1,12 +1,17 @@
 package routeguide
 package runtime.handlers
 
+import java.lang.Throwable
+
 import cats._
 import cats.implicits._
-import io.grpc.StatusRuntimeException
+import io.grpc.{Status, StatusRuntimeException}
 import journal.Logger
 import monix.eval.Task
+import monix.reactive.Observable
 import routeguide.protocols._
+
+import scala.concurrent.duration._
 
 class RouteGuideClientHandler[F[_]: Monad](
     implicit client: RouteGuideService.Client[F],
@@ -56,7 +61,33 @@ class RouteGuideClientHandler[F[_]: Monad](
       .completedL
   }
 
-  override def recordRoute(features: List[Feature], numPoints: Int): F[Unit] = ???
+  override def recordRoute(features: List[Feature], numPoints: Int): F[Unit] = {
+    def takeN: List[Feature] = scala.util.Random.shuffle(features).take(numPoints)
+
+    M.handleErrorWith {
+      val attempt: F[Unit] = M.catchNonFatal {
+        val points = takeN.map(_.location)
+        logger.info(s"*** RecordRoute. Points: ${points.map(_.pretty).mkString(";")}")
+
+        client
+          .recordRoute(
+            Observable
+              .fromIterable(points)
+              .delayOnNext(10.milliseconds)
+              .delayOnComplete(1.minute)
+          )
+          .map { summary: RouteSummary =>
+            logger.info(
+              s"Finished trip with ${summary.point_count} points. Passed ${summary.feature_count} features. " +
+                s"Travelled ${summary.distance} meters. It took ${summary.elapsed_time} seconds.")
+          }
+      }
+      attempt
+    } { e: Throwable =>
+      logger.warn(s"RecordRoute Failed: ${Status.fromThrowable(e)}", e)
+      M.raiseError(e)
+    }
+  }
 
   override def routeChat: F[Unit] = ???
 

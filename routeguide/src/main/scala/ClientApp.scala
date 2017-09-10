@@ -16,8 +16,11 @@
 
 package routeguide
 
+import java.util.concurrent.TimeUnit
+
 import cats.implicits._
 import freestyle._
+import routeguide.runtime.common.features
 import routeguide.protocols.Feature
 import routeguide.runtime.client.implicits._
 
@@ -43,12 +46,17 @@ object ClientApp {
       _ <- APP.getFeature(0, 0)
       // Looking for features between 40, -75 and 42, -73.
       _ <- APP.listFeatures(400000000, -750000000, 420000000, -730000000)
+      // Record a few randomly selected points from the features file.
+      _ <- APP.recordRoute(features, 10)
     } yield ()
   }
 
   def main(args: Array[String]): Unit = {
     Await.result(clientApp[RouteGuideClient.Op].interpret[Future], Duration.Inf)
 
+    channel.shutdown().awaitTermination(1, TimeUnit.MINUTES)
+
+    (): Unit
     System.in.read()
   }
 
