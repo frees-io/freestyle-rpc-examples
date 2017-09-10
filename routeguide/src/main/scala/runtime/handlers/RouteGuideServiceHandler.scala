@@ -44,6 +44,8 @@ class RouteGuideServiceHandler[F[_]](implicit C: Capture[F], T2F: Task ~> F)
       }
     )
 
+    logger.info(s"Listing features for $rectangle ...")
+
     C.capture(observable)
   }
 
@@ -82,6 +84,8 @@ class RouteGuideServiceHandler[F[_]](implicit C: Capture[F], T2F: Task ~> F)
     C.capture {
       routeNotes
         .flatMap { note: RouteNote =>
+          logger.info(s"Got route note $note, adding it... ")
+
           addNote(note)
           Observable.fromIterable(getOrCreateNotes(note.location))
         }

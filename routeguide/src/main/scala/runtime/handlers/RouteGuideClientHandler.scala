@@ -89,6 +89,35 @@ class RouteGuideClientHandler[F[_]: Monad](
     }
   }
 
-  override def routeChat: F[Unit] = ???
+  override def routeChat: F[Unit] = T2F.apply {
+    logger.info("*** RouteChat")
+    client
+      .routeChat(
+        Observable
+          .fromIterable(List(
+            RouteNote(message = "First message", location = Point(0, 0)),
+            RouteNote(message = "Second message", location = Point(0, 1)),
+            RouteNote(message = "Third message", location = Point(1, 0)),
+            RouteNote(message = "Fourth message", location = Point(1, 1))
+          ))
+          .delayOnNext(10.milliseconds)
+          .delayOnComplete(1.minute)
+          .map { routeNote =>
+            logger.info(s"Sending message '${routeNote.message}' at " +
+              s"${routeNote.location.latitude}, ${routeNote.location.longitude}")
+            routeNote
+          }
+      )
+      .map { note: RouteNote =>
+        logger.info(s"Got message '${note.message}' at " +
+          s"${note.location.latitude}, ${note.location.longitude}")
+      }
+      .onErrorHandle {
+        case e: Throwable =>
+          logger.warn(s"RouteChat Failed: ${Status.fromThrowable(e)}", e)
+          throw e
+      }
+      .completedL
+  }
 
 }

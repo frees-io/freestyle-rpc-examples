@@ -47,7 +47,9 @@ object ClientApp {
       // Looking for features between 40, -75 and 42, -73.
       _ <- APP.listFeatures(400000000, -750000000, 420000000, -730000000)
       // Record a few randomly selected points from the features file.
-      _ <- APP.recordRoute(features, 10)
+      // _ <- APP.recordRoute(features, 10) // fixme
+      // Send and receive some notes.
+      _ <- APP.routeChat
     } yield ()
   }
 
