@@ -9,9 +9,26 @@
 
 This repo brings some simple examples using [freestyle-rpc](https://github.com/frees-io/freestyle-rpc).
 
+1. Route Guide Demo (using scala annotations for service definitions).
 1. Greeting Demo (using `.proto` files for service definitions).
 1. ProtocolGen Demo (using scala annotations for service definitions).
 1. User Demo (http extensions on top of gRPC, using grpc-gateway).
+
+## Route Guide Demo
+
+Based on the [grpc-java](https://github.com/grpc/grpc-java/tree/6ea2b8aacb0a193ac727e061bc228b40121460e3/examples/src/main/java/io/grpc/examples/routeguide) example.
+
+Run server:
+
+```
+sbt runRouteGuideServer
+```
+
+Run client:
+
+```
+sbt runRouteGuideClient
+```
 
 ## Greeting Demo
 
