@@ -20,15 +20,15 @@ package runtime
 import cats.~>
 import journal.Logger
 import monix.eval.Task
-import routeguide.protocols.{Feature, FeatureDatabase}
-import routeguide.codecs._
 
 import scala.concurrent.{ExecutionContext, Future}
-import scala.io.Source
+import scala.concurrent.duration._
 
-trait CommonImplicits {
+trait RouteGuide {
 
   val logger: Logger = Logger[this.type]
+
+  protected val atMostDuration: FiniteDuration = 10.seconds
 
   implicit val ec: ExecutionContext = ExecutionContext.Implicits.global
   implicit val S: monix.execution.Scheduler =
@@ -36,28 +36,17 @@ trait CommonImplicits {
 
   implicit val task2Future: Task ~> Future = new (Task ~> Future) {
     override def apply[A](fa: Task[A]): Future[A] = {
-      logger.info("Running the Task as Future...")
-      fa.runAsync.recover {
-        case e: Throwable =>
-          logger.error(s"An error has occurred running Task to Future", e)
-          throw e
-      }
+      logger.info(s"${Thread.currentThread().getName} Running the Task as Future...")
+      fa.timeout(60.seconds).runAsync
     }
   }
 
-}
-
-object common extends CommonImplicits {
-
-  val features: List[Feature] =
-    io.circe.parser.decode[FeatureDatabase](
-      Source
-        .fromInputStream(getClass.getClassLoader.getResourceAsStream("route_guide_db.json"))
-        .mkString) match {
-      case Right(fList) => fList.feature
-      case Left(e) =>
-        println(s"Decoding failure: $e")
-        throw e
+  implicit val future2Task: Future ~> Task = new (Future ~> Task) {
+    override def apply[A](fa: Future[A]): Task[A] = {
+      logger.info(s"${Thread.currentThread().getName} Deferring Future to Task...")
+      Task.deferFuture(fa)
     }
-
+  }
 }
+
+object RouteGuide extends RouteGuide

@@ -1,5 +1,5 @@
 package routeguide
-package runtime.handlers
+package handlers
 
 import java.util.concurrent.atomic.AtomicReference
 
@@ -9,7 +9,6 @@ import journal.Logger
 import monix.eval.Task
 import monix.reactive.Observable
 import routeguide.protocols._
-import routeguide.runtime.common._
 
 import scala.concurrent.duration.NANOSECONDS
 
@@ -49,35 +48,65 @@ class RouteGuideServiceHandler[F[_]](implicit C: Capture[F], T2F: Task ~> F)
     C.capture(observable)
   }
 
-  override protected[this] def recordRoute(points: Observable[protocols.Point]): F[RouteSummary] = {
-
+  override protected[this] def recordRoute(points: Observable[protocols.Point]): F[RouteSummary] =
     // For each point after the first, add the incremental distance from the previous point to
     // the total distance value. We're starting
 
     // We have to applyApplies a binary operator to a start value and all elements of
     // the source, going left to right and returns a new `Task` that
     // upon evaluation will eventually emit the final result.
-    T2F.apply(
+    T2F(
       points
         .foldLeftL((RouteSummary(0, 0, 0, 0), None: Option[Point], System.nanoTime())) {
-          case ((routeSummary, previous, startTime), point) =>
-            val counter  = if (point.findFeatureIn(features).valid) 1 else 0
+          case ((summary, previous, startTime), point) =>
+            val feature  = point.findFeatureIn(features)
             val distance = previous.map(calcDistance(_, point)) getOrElse 0
-            val updatedRouteSummary: RouteSummary = routeSummary.copy(
-              point_count = routeSummary.point_count + 1,
-              feature_count = routeSummary.feature_count + counter,
-              distance = routeSummary.distance + distance,
+            val updated = summary.copy(
+              point_count = summary.point_count + 1,
+              feature_count = summary.feature_count + (if (feature.valid) 1 else 0),
+              distance = summary.distance + distance,
               elapsed_time = NANOSECONDS.toSeconds(System.nanoTime() - startTime).toInt
             )
-            (updatedRouteSummary, Some(point), startTime)
+            (updated, Some(point), startTime)
         }
         .map(_._1)
-        .onErrorHandle { e =>
-          logger.warn("recordRoute cancelled", e)
-          throw e
-        }
     )
-  }
+//
+//
+
+//
+//    println("*********")
+//    points.foreach(p => println(s"Point p = $p"))
+//    println("*********")
+//
+//    val a = points
+//      .foldLeftL((RouteSummary(0, 0, 0, 0), None: Option[Point], System.nanoTime())) {
+//        case ((routeSummary, previous, startTime), point) =>
+//          println(s"routeSummary = $routeSummary")
+//          println(s"previous = $previous")
+//          println(s"startTime = $startTime")
+//
+//          val counter = if (point.findFeatureIn(features).valid) 1 else 0
+//
+//          println(s"counter = $counter")
+//
+//          val distance = previous.map(calcDistance(_, point)) getOrElse 0
+//
+//          println(s"distance = $distance")
+//
+//          val updatedRouteSummary: RouteSummary = routeSummary.copy(
+//            point_count = routeSummary.point_count + 1,
+//            feature_count = routeSummary.feature_count + counter,
+//            distance = routeSummary.distance + distance,
+//            elapsed_time = NANOSECONDS.toSeconds(System.nanoTime() - startTime).toInt
+//          )
+//
+//          println(s"updatedRouteSummary = $updatedRouteSummary")
+//
+//          (updatedRouteSummary, Some(point), startTime)
+//      }
+//    T2F(a.map(_._1))
+//  }
 
   override protected[this] def routeChat(
       routeNotes: Observable[protocols.RouteNote]): F[Observable[RouteNote]] =

@@ -1,8 +1,26 @@
+import journal.Logger
 import routeguide.protocols._
 
+import scala.io.Source
+import routeguide.codecs._
 import scala.language.implicitConversions
 
 package object routeguide {
+
+  val logger: Logger = Logger[this.type]
+
+  val features: List[Feature] = {
+    logger.info("###### Loading route guide db...")
+    io.circe.parser.decode[FeatureDatabase](
+      Source
+        .fromInputStream(getClass.getClassLoader.getResourceAsStream("route_guide_db.json"))
+        .mkString) match {
+      case Right(fList) => fList.feature
+      case Left(e) =>
+        logger.info(s"Decoding failure: $e")
+        throw e
+    }
+  }
 
   implicit def pointOps(location: Point): PointOps      = new PointOps(location)
   implicit def featureOps(feature: Feature): FeatureOps = new FeatureOps(feature)

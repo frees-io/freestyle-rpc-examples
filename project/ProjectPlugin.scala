@@ -11,7 +11,7 @@ object ProjectPlugin extends AutoPlugin {
 
     object V {
       lazy val frees    = "0.3.1"
-      lazy val freesRPC = "0.0.3-SNAPSHOT"
+      lazy val freesRPC = "0.0.3"
       lazy val circe    = "0.8.0"
     }
 
@@ -19,7 +19,7 @@ object ProjectPlugin extends AutoPlugin {
       "io.circe" %% "circe-core",
       "io.circe" %% "circe-generic",
       "io.circe" %% "circe-parser"
-    ).map(_ % V.circe)
+    ).map(_ % V.circe) ++ Seq("io.monix" %% "monix-cats" % "2.3.0")
 
     lazy val GOPATH: String = Option(sys.props("go.path")).getOrElse("/your/go/path")
 
@@ -76,25 +76,10 @@ object ProjectPlugin extends AutoPlugin {
   import autoImport.V
 
   lazy val commandAliases: Seq[Def.Setting[_]] =
-    addCommandAlias("validateHttpDemo", ";project demo-http;clean;compile;test") ++
-      addCommandAlias(
-        "runGreetingServer",
-        ";project demo-greeting;runMain freestyle.rpc.demo.greeting.GreetingServerApp") ++
-      addCommandAlias(
-        "runGreetingClient",
-        ";project demo-greeting;runMain freestyle.rpc.demo.greeting.GreetingClientApp") ++
-      addCommandAlias(
-        "runProtoGenServer",
-        ";project demo-protocolgen;runMain freestyle.rpc.demo.protocolgen.ServerApp") ++
-      addCommandAlias(
-        "runProtoGenClient",
-        ";project demo-protocolgen;runMain freestyle.rpc.demo.protocolgen.ClientApp") ++
-      addCommandAlias(
-        "runRouteGuideServer",
-        ";project demo-routeguide;runMain routeguide.ServerApp") ++
-      addCommandAlias(
-        "runRouteGuideClient",
-        ";project demo-routeguide;runMain routeguide.ClientApp")
+    addCommandAlias("runServerF", ";project demo-routeguide;runMain routeguide.ServerAppF") ++
+      addCommandAlias("runClientF", ";project demo-routeguide;runMain routeguide.ClientAppF") ++
+      addCommandAlias("runServerT", ";project demo-routeguide;runMain routeguide.ServerAppT") ++
+      addCommandAlias("runClientT", ";project demo-routeguide;runMain routeguide.ClientAppT")
 
   lazy val demoCommonSettings = Seq(
     name := "freestyle-rpc-examples",

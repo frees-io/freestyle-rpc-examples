@@ -20,12 +20,12 @@ import cats.implicits._
 import freestyle.rpc.server.GrpcServerApp
 import freestyle.rpc.server.implicits._
 import journal.Logger
-import routeguide.runtime.server.implicits._
+import routeguide.serverF.implicits._
 
 import scala.concurrent.Await
 import scala.concurrent.duration.Duration
 
-object ServerApp {
+object ServerAppF {
 
   val logger: Logger = Logger[this.type]
 
