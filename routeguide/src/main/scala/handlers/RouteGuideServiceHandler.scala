@@ -71,42 +71,6 @@ class RouteGuideServiceHandler[F[_]](implicit C: Capture[F], T2F: Task ~> F)
         }
         .map(_._1)
     )
-//
-//
-
-//
-//    println("*********")
-//    points.foreach(p => println(s"Point p = $p"))
-//    println("*********")
-//
-//    val a = points
-//      .foldLeftL((RouteSummary(0, 0, 0, 0), None: Option[Point], System.nanoTime())) {
-//        case ((routeSummary, previous, startTime), point) =>
-//          println(s"routeSummary = $routeSummary")
-//          println(s"previous = $previous")
-//          println(s"startTime = $startTime")
-//
-//          val counter = if (point.findFeatureIn(features).valid) 1 else 0
-//
-//          println(s"counter = $counter")
-//
-//          val distance = previous.map(calcDistance(_, point)) getOrElse 0
-//
-//          println(s"distance = $distance")
-//
-//          val updatedRouteSummary: RouteSummary = routeSummary.copy(
-//            point_count = routeSummary.point_count + 1,
-//            feature_count = routeSummary.feature_count + counter,
-//            distance = routeSummary.distance + distance,
-//            elapsed_time = NANOSECONDS.toSeconds(System.nanoTime() - startTime).toInt
-//          )
-//
-//          println(s"updatedRouteSummary = $updatedRouteSummary")
-//
-//          (updatedRouteSummary, Some(point), startTime)
-//      }
-//    T2F(a.map(_._1))
-//  }
 
   override protected[this] def routeChat(
       routeNotes: Observable[protocols.RouteNote]): F[Observable[RouteNote]] =

@@ -20,79 +20,23 @@ import cats.implicits._
 import freestyle._
 import freestyle.implicits._
 import freestyle.async.implicits._
+import freestyle.asyncMonix.implicits._
 import routeguide.handlers.RouteGuideClientHandler
 import routeguide.protocols.RouteGuideService
-
-import cats.{~>, Comonad}
-import freestyle.async.{AsyncContext, Proc}
-import freestyle.rpc.server._
-import routeguide.handlers.RouteGuideServiceHandler
+import cats.~>
 import monix.eval.Task
 import monix.cats._
 import routeguide.runtime._
 
-import scala.concurrent.Await
-
-trait TaskInstances extends RouteGuide {
-
-  implicit val task2Task: Task ~> Task = new (Task ~> Task) {
-    override def apply[A](fa: Task[A]): Task[A] = fa
-  }
-
-  implicit val taskAsyncContext: AsyncContext[Task] = new AsyncContext[Task] {
-    def runAsync[A](fa: Proc[A]): Task[A] = Task.deferFuture(futureAsyncContext.runAsync(fa))
-  }
-
-  implicit val taskCaptureInstance: Capture[monix.eval.Task] =
-    new Capture[monix.eval.Task] {
-      def capture[A](a: => A): monix.eval.Task[A] = Task.eval(a)
-    }
-
-  implicit def taskComonad: Comonad[Task] =
-    new Comonad[Task] {
-      def extract[A](x: Task[A]): A =
-        Await.result(x.runAsync, atMostDuration)
-
-      override def coflatMap[A, B](fa: Task[A])(f: (Task[A]) => B): Task[B] = Task.eval(f(fa))
-
-      override def map[A, B](fa: Task[A])(f: (A) => B): Task[B] =
-        fa.map(f)
-    }
-}
-
 object clientT {
 
-  trait Implicits extends TaskInstances with ClientConf {
+  trait Implicits extends RouteGuide with ClientConf {
 
     implicit val routeGuideServiceClient: RouteGuideService.Client[Task] =
       RouteGuideService.client[Task](channel)
 
     implicit val routeGuideClientHandler: RouteGuideClientHandler[Task] =
       new RouteGuideClientHandler[Task]
-  }
-
-  object implicits extends Implicits
-
-}
-
-object serverT {
-
-  trait Implicits extends TaskInstances with ServerConf {
-
-    import freestyle.rpc.server.handlers._
-    import freestyle.rpc.server.implicits._
-
-    implicit val routeGuideServiceHandler: RouteGuideService.Handler[Task] =
-      new RouteGuideServiceHandler[Task]
-
-    val grpcConfigs: List[GrpcConfig] = List(
-      AddService(RouteGuideService.bindService[RouteGuideService.Op, Task])
-    )
-
-    implicit val grpcServerTaskHandler: GrpcServer.Op ~> Task =
-      new GrpcServerHandler[Task] andThen
-        new GrpcKInterpreter[Task](getConf(grpcConfigs).server)
-
   }
 
   object implicits extends Implicits

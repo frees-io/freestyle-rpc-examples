@@ -23,59 +23,19 @@ import freestyle.async.implicits._
 import routeguide.handlers.RouteGuideClientHandler
 import routeguide.protocols.RouteGuideService
 
-import cats.{~>, Comonad}
-import freestyle.rpc.server._
-import routeguide.handlers.RouteGuideServiceHandler
 import routeguide.runtime._
 
-import scala.concurrent.{Await, ExecutionContext, Future}
-
-trait FutureInstances extends RouteGuide {
-
-  implicit def futureComonad(implicit ec: ExecutionContext): Comonad[Future] =
-    new Comonad[Future] {
-      def extract[A](x: Future[A]): A =
-        Await.result(x, atMostDuration)
-
-      override def coflatMap[A, B](fa: Future[A])(f: (Future[A]) => B): Future[B] = Future(f(fa))
-
-      override def map[A, B](fa: Future[A])(f: (A) => B): Future[B] =
-        fa.map(f)
-    }
-}
+import scala.concurrent.Future
 
 object clientF {
 
-  trait Implicits extends FutureInstances with ClientConf {
+  trait Implicits extends RouteGuide with ClientConf {
 
     implicit val routeGuideServiceClient: RouteGuideService.Client[Future] =
       RouteGuideService.client[Future](channel)
 
     implicit val routeGuideClientHandler: RouteGuideClientHandler[Future] =
       new RouteGuideClientHandler[Future]
-  }
-
-  object implicits extends Implicits
-
-}
-
-object serverF {
-
-  trait Implicits extends FutureInstances with ServerConf {
-
-    import freestyle.rpc.server.handlers._
-    import freestyle.rpc.server.implicits._
-
-    implicit val routeGuideServiceHandler: RouteGuideService.Handler[Future] =
-      new RouteGuideServiceHandler[Future]
-
-    val grpcConfigs: List[GrpcConfig] = List(
-      AddService(RouteGuideService.bindService[RouteGuideService.Op, Future])
-    )
-
-    implicit val grpcServerHandler: GrpcServer.Op ~> Future =
-      new GrpcServerHandler[Future] andThen
-        new GrpcKInterpreter[Future](getConf(grpcConfigs).server)
   }
 
   object implicits extends Implicits

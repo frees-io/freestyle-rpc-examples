@@ -10,6 +10,7 @@ import monix.reactive.Observable
 import routeguide.protocols._
 
 import scala.concurrent.duration._
+import scala.util.{Failure, Success, Try}
 
 class RouteGuideClientHandler[F[_]: Monad](
     implicit client: RouteGuideService.Client[F],
@@ -64,8 +65,10 @@ class RouteGuideClientHandler[F[_]: Monad](
       logger.info(s"*** RecordRoute. Points: ${points.map(_.pretty).mkString(";")}")
 
       client
-        .recordRoute(Observable
-          .fromIterable(points))
+        .recordRoute(
+          Observable
+            .fromIterable(points)
+            .delayOnNext(500.milliseconds))
         .map { summary: RouteSummary =>
           logger.info(
             s"Finished trip with ${summary.point_count} points. Passed ${summary.feature_count} features. " +
@@ -89,7 +92,6 @@ class RouteGuideClientHandler[F[_]: Monad](
             RouteNote(message = "Fourth message", location = Point(1, 1))
           ))
           .delayOnNext(10.milliseconds)
-          .delayOnComplete(1.minute)
           .map { routeNote =>
             logger.info(s"Sending message '${routeNote.message}' at " +
               s"${routeNote.location.latitude}, ${routeNote.location.longitude}")

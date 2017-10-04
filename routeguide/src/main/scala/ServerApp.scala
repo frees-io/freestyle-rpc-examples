@@ -19,13 +19,13 @@ package routeguide
 import cats.implicits._
 import freestyle.rpc.server.GrpcServerApp
 import freestyle.rpc.server.implicits._
+import routeguide.runtime.server.implicits._
 import journal.Logger
-import routeguide.serverF.implicits._
 
 import scala.concurrent.Await
 import scala.concurrent.duration.Duration
 
-object ServerAppF {
+object ServerApp {
 
   val logger: Logger = Logger[this.type]
 

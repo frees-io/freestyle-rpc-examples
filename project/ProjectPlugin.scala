@@ -19,7 +19,7 @@ object ProjectPlugin extends AutoPlugin {
       "io.circe" %% "circe-core",
       "io.circe" %% "circe-generic",
       "io.circe" %% "circe-parser"
-    ).map(_ % V.circe) ++ Seq("io.monix" %% "monix-cats" % "2.3.0")
+    ).map(_ % V.circe)
 
     lazy val GOPATH: String = Option(sys.props("go.path")).getOrElse("/your/go/path")
 
@@ -76,9 +76,8 @@ object ProjectPlugin extends AutoPlugin {
   import autoImport.V
 
   lazy val commandAliases: Seq[Def.Setting[_]] =
-    addCommandAlias("runServerF", ";project demo-routeguide;runMain routeguide.ServerAppF") ++
+    addCommandAlias("runServer", ";project demo-routeguide;runMain routeguide.ServerApp") ++
       addCommandAlias("runClientF", ";project demo-routeguide;runMain routeguide.ClientAppF") ++
-      addCommandAlias("runServerT", ";project demo-routeguide;runMain routeguide.ServerAppT") ++
       addCommandAlias("runClientT", ";project demo-routeguide;runMain routeguide.ClientAppT")
 
   lazy val demoCommonSettings = Seq(
@@ -92,12 +91,14 @@ object ProjectPlugin extends AutoPlugin {
       Resolver.bintrayRepo("beyondthelines", "maven")
     ),
     libraryDependencies ++= Seq(
-      "io.frees" %% "freestyle"         % V.frees,
-      "io.frees" %% "freestyle-async"   % V.frees,
-      "io.frees" %% "freestyle-config"  % V.frees,
-      "io.frees" %% "freestyle-logging" % V.frees,
-      "io.frees" %% "frees-rpc"         % V.freesRPC,
-      "io.grpc"  % "grpc-netty"         % cv.grpcJavaVersion
+      "io.frees" %% "freestyle"             % V.frees,
+      "io.frees" %% "freestyle-async"       % V.frees,
+      "io.frees" %% "freestyle-config"      % V.frees,
+      "io.frees" %% "freestyle-logging"     % V.frees,
+      "io.frees" %% "freestyle-async-monix" % V.frees,
+      "io.frees" %% "frees-rpc"             % V.freesRPC,
+      "io.monix" %% "monix-cats"            % "2.3.0",
+      "io.grpc"  % "grpc-netty"             % cv.grpcJavaVersion
     )
   )
 
