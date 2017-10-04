@@ -11,8 +11,15 @@ object ProjectPlugin extends AutoPlugin {
 
     object V {
       lazy val frees    = "0.3.1"
-      lazy val freesRPC = "0.0.1"
+      lazy val freesRPC = "0.0.3"
+      lazy val circe    = "0.8.0"
     }
+
+    val circeDeps: Seq[ModuleID] = Seq(
+      "io.circe" %% "circe-core",
+      "io.circe" %% "circe-generic",
+      "io.circe" %% "circe-parser"
+    ).map(_ % V.circe)
 
     lazy val GOPATH: String = Option(sys.props("go.path")).getOrElse("/your/go/path")
 
@@ -69,19 +76,9 @@ object ProjectPlugin extends AutoPlugin {
   import autoImport.V
 
   lazy val commandAliases: Seq[Def.Setting[_]] =
-    addCommandAlias("validateHttpDemo", ";project demo-http;clean;compile;test") ++
-      addCommandAlias(
-        "runGreetingServer",
-        ";project demo-greeting;runMain freestyle.rpc.demo.greeting.GreetingServerApp") ++
-      addCommandAlias(
-        "runGreetingClient",
-        ";project demo-greeting;runMain freestyle.rpc.demo.greeting.GreetingClientApp") ++
-      addCommandAlias(
-        "runProtoGenServer",
-        ";project demo-protocolgen;runMain freestyle.rpc.demo.protocolgen.ServerApp") ++
-      addCommandAlias(
-        "runProtoGenClient",
-        ";project demo-protocolgen;runMain freestyle.rpc.demo.protocolgen.ClientApp")
+    addCommandAlias("runServer", ";project demo-routeguide;runMain routeguide.ServerApp") ++
+      addCommandAlias("runClientF", ";project demo-routeguide;runMain routeguide.ClientAppF") ++
+      addCommandAlias("runClientT", ";project demo-routeguide;runMain routeguide.ClientAppT")
 
   lazy val demoCommonSettings = Seq(
     name := "freestyle-rpc-examples",
@@ -94,11 +91,14 @@ object ProjectPlugin extends AutoPlugin {
       Resolver.bintrayRepo("beyondthelines", "maven")
     ),
     libraryDependencies ++= Seq(
-      "io.frees" %% "freestyle"        % V.frees,
-      "io.frees" %% "freestyle-async"  % V.frees,
-      "io.frees" %% "freestyle-config" % V.frees,
-      "io.frees" %% "frees-rpc"        % V.freesRPC,
-      "io.grpc"  % "grpc-netty"        % cv.grpcJavaVersion
+      "io.frees" %% "freestyle"             % V.frees,
+      "io.frees" %% "freestyle-async"       % V.frees,
+      "io.frees" %% "freestyle-config"      % V.frees,
+      "io.frees" %% "freestyle-logging"     % V.frees,
+      "io.frees" %% "freestyle-async-monix" % V.frees,
+      "io.frees" %% "frees-rpc"             % V.freesRPC,
+      "io.monix" %% "monix-cats"            % "2.3.0",
+      "io.grpc"  % "grpc-netty"             % cv.grpcJavaVersion
     )
   )
 
