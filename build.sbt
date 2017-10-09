@@ -8,8 +8,6 @@ lazy val root = project
 lazy val `demo-routeguide` = project
   .in(file("routeguide"))
   .settings(moduleName := "demo-routeguide")
-  .settings(protoGenTaskSettings: _*)
-  .settings(libraryDependencies ++= circeDeps)
   .settings(
     unmanagedSourceDirectories in Compile ++= Seq(
       baseDirectory.value / "src" / "main" / "scala-future",
