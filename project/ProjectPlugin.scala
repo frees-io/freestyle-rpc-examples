@@ -33,6 +33,11 @@ object ProjectPlugin extends AutoPlugin {
     organization := "frees-io",
     organizationName := "47 Degrees",
     scalaVersion := "2.12.3",
+    resolvers ++= Seq(
+      Resolver.sonatypeRepo("snapshots"),
+      Resolver.sonatypeRepo("releases"),
+      Resolver.bintrayRepo("beyondthelines", "maven")
+    ),
     libraryDependencies ++= circeDeps ++ Seq(
       "io.frees" %% "freestyle"             % V.frees,
       "io.frees" %% "freestyle-async"       % V.frees,
