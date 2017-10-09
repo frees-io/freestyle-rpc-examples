@@ -1,9 +1,12 @@
+import freestyle.ProtoGenPlugin
 import sbt.Keys._
 import sbt._
 
 object ProjectPlugin extends AutoPlugin {
 
   override def trigger: PluginTrigger = allRequirements
+
+  override def requires = ProtoGenPlugin
 
   object autoImport {
 
