@@ -1,3 +1,6 @@
+// This file has been automatically generated for use by
+// sbt-frees-protogen plugin, from freestyle-rpc service definitions
+
 syntax = "proto3";
 
 option java_package = "routeguide";
@@ -42,3 +45,4 @@ service RouteGuideService {
    rpc routeChat (stream RouteNote) returns (stream RouteNote) {}
 }
            
+              
