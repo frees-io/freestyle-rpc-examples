@@ -1,8 +1,8 @@
 lazy val V = new {
-  lazy val frees = "0.3.1"
-  lazy val freesRPC = "0.0.6"
-  lazy val circe = "0.8.0"
-  lazy val monix = "2.3.0"
+  lazy val frees    = "0.4.0"
+  lazy val freesRPC = "0.0.8"
+  lazy val circe    = "0.9.0-M1"
+  lazy val monix    = "3.0.0-M1"
 }
 
 lazy val `demo-routeguide` = project
@@ -18,13 +18,13 @@ lazy val `demo-routeguide` = project
       Resolver.bintrayRepo("beyondthelines", "maven")
     ),
     libraryDependencies ++= Seq(
-      "io.frees" %% "freestyle" % V.frees,
-      "io.frees" %% "freestyle-async" % V.frees,
-      "io.frees" %% "freestyle-config" % V.frees,
-      "io.frees" %% "freestyle-logging" % V.frees,
-      "io.frees" %% "freestyle-async-monix" % V.frees,
-      "io.frees" %% "frees-rpc" % V.freesRPC,
-      "io.monix" %% "monix-cats" % V.monix
+      "io.frees" %% "frees-core"              % V.frees,
+      "io.frees" %% "frees-async"             % V.frees,
+      "io.frees" %% "frees-async-cats-effect" % V.frees,
+      "io.frees" %% "frees-config"            % V.frees,
+      "io.frees" %% "frees-logging"           % V.frees,
+      "io.frees" %% "frees-rpc"               % V.freesRPC,
+      "io.monix" %% "monix"                   % V.monix
     ) ++ Seq(
       "io.circe" %% "circe-core",
       "io.circe" %% "circe-generic",
@@ -42,7 +42,7 @@ lazy val `demo-routeguide` = project
       addCompilerPlugin("org.scalameta" % "paradise" % "3.0.0-M10" cross CrossVersion.full),
       libraryDependencies += "org.scalameta" %% "scalameta" % "1.8.0",
       scalacOptions += "-Xplugin-require:macroparadise",
-      scalacOptions in(Compile, console) ~= (_ filterNot (_ contains "paradise")) // macroparadise plugin doesn't work in repl yet.
+      scalacOptions in (Compile, console) ~= (_ filterNot (_ contains "paradise")) // macroparadise plugin doesn't work in repl yet.
     ): _*
   )
 
