@@ -7,7 +7,7 @@ lazy val V = new {
 
 lazy val `demo-routeguide` = project
   .in(file("routeguide"))
-  .settings(name := "freestyle-rpc-examples")
+  .settings(name := "frees-rpc-examples")
   .settings(moduleName := "demo-routeguide")
   .settings(Seq(
     organization := "frees-io",
