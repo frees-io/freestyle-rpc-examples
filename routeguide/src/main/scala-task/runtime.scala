@@ -20,12 +20,11 @@ import cats.implicits._
 import freestyle._
 import freestyle.implicits._
 import freestyle.async.implicits._
-import freestyle.asyncMonix.implicits._
+import freestyle.asyncCatsEffect.implicits._
 import routeguide.handlers.RouteGuideClientHandler
 import routeguide.protocols.RouteGuideService
-import cats.~>
 import monix.eval.Task
-import monix.cats._
+import monix.eval.instances.CatsAsyncInstances._
 import routeguide.runtime._
 
 object clientT {

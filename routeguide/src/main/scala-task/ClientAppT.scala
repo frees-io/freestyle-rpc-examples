@@ -18,7 +18,6 @@ package routeguide
 
 import freestyle._
 import monix.eval.Task
-import monix.cats._
 import routeguide.clientT.implicits._
 
 import scala.concurrent.Await

@@ -45,8 +45,10 @@ trait FutureInstances extends freestyle.rpc.client.FutureInstances {
 
   implicit def futureComonad(implicit ec: ExecutionContext): Comonad[Future] =
     new Comonad[Future] {
-      def extract[A](x: Future[A]): A =
+      def extract[A](x: Future[A]): A = {
+        logger.info(s"${Thread.currentThread().getName} Waiting $atMostDuration for $x...")
         Await.result(x, atMostDuration)
+      }
 
       override def coflatMap[A, B](fa: Future[A])(f: (Future[A]) => B): Future[B] = Future(f(fa))
 

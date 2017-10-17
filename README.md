@@ -29,6 +29,14 @@ Run client interpreting to `monix.eval.Task`:
 sbt runClientT
 ```
 
+## Generating the proto file
+
+```bash
+sbt demo-routeguide/protoGen
+```
+
+The previous command will overwrite [this proto file](routeguide/src/main/proto/service.proto).
+
 [comment]: # (Start Copyright)
 # Copyright
 
