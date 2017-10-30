@@ -20,6 +20,7 @@ import cats.implicits._
 import freestyle._
 import freestyle.implicits._
 import freestyle.async.implicits._
+import freestyle.rpc.client.implicits._
 import routeguide.handlers.RouteGuideClientHandler
 import routeguide.protocols.RouteGuideService
 
