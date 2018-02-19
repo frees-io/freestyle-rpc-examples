@@ -2,15 +2,23 @@ package routeguide
 package handlers
 
 import cats._
+import cats.effect.Effect
 import cats.implicits._
 import io.grpc.{Status, StatusRuntimeException}
-import journal.Logger
 import monix.eval.Task
 import monix.reactive.Observable
+import org.log4s._
 import routeguide.protocols._
+import freestyle.tagless._
+import freestyle.tagless.async.implicits._
+import freestyle.tagless.config.implicits._
+import freestyle.async.catsEffect.implicits._
+import freestyle.rpc.client._
+import freestyle.rpc.client.config._
+import freestyle.rpc.client.implicits._
+import monix.execution.Scheduler
 
 import scala.concurrent.duration._
-import scala.util.{Failure, Success, Try}
 
 class RouteGuideClientHandler[F[_]: Monad](
     implicit client: RouteGuideService.Client[F],
@@ -18,7 +26,7 @@ class RouteGuideClientHandler[F[_]: Monad](
     T2F: Task ~> F)
     extends RouteGuideClient.Handler[F] {
 
-  val logger: Logger = Logger[this.type]
+  val logger = getLogger
 
   override def getFeature(lat: Int, lon: Int): F[Unit] =
     M.handleErrorWith {
@@ -32,7 +40,7 @@ class RouteGuideClientHandler[F[_]: Monad](
         }
     } {
       case e: StatusRuntimeException =>
-        logger.warn(s"RPC failed:${e.getStatus}", e)
+        logger.warn(s"RPC failed:${e.getStatus} $e")
         M.raiseError(e)
     }
 
@@ -51,7 +59,7 @@ class RouteGuideClientHandler[F[_]: Monad](
       }
       .onErrorHandle {
         case e: StatusRuntimeException =>
-          logger.warn(s"RPC failed: ${e.getStatus}", e)
+          logger.warn(s"RPC failed: ${e.getStatus} $e")
           throw e
       }
       .completedL
@@ -75,7 +83,7 @@ class RouteGuideClientHandler[F[_]: Monad](
               s"Travelled ${summary.distance} meters. It took ${summary.elapsed_time} seconds.")
         }
     } { e: Throwable =>
-      logger.warn(s"RecordRoute Failed: ${Status.fromThrowable(e)}", e)
+      logger.warn(s"RecordRoute Failed: ${Status.fromThrowable(e)} $e")
       M.raiseError(e)
     }
   }
@@ -104,7 +112,7 @@ class RouteGuideClientHandler[F[_]: Monad](
       }
       .onErrorHandle {
         case e: Throwable =>
-          logger.warn(s"RouteChat Failed: ${Status.fromThrowable(e)}", e)
+          logger.warn(s"RouteChat Failed: ${Status.fromThrowable(e)} $e")
           throw e
       }
       .completedL

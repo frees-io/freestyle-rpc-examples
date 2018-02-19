@@ -11,22 +11,22 @@ This repo brings a simple example using [freestyle-rpc](https://github.com/frees
 
 ## Running the Example
 
-Run server (interpreted to `scala.concurrent.Future` in this case):
+Run server (interpreted to `cats.effect.IO` in this case):
 
 ```bash
 sbt runServer
 ```
 
-Run client interpreting to `scala.concurrent.Future`:
+Run client interpreting to `cats.effect.IO`:
 
 ```bash
-sbt runClientF
+sbt runClientIO
 ```
 
 Run client interpreting to `monix.eval.Task`:
 
 ```bash
-sbt runClientT
+sbt runClientTask
 ```
 
 ## Generating the proto file

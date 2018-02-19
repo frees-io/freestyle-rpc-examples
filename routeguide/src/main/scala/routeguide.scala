@@ -1,13 +1,12 @@
-import journal.Logger
+import org.log4s._
 import routeguide.protocols._
-
-import scala.io.Source
 import routeguide.codecs._
+import scala.io.Source
 import scala.language.implicitConversions
 
 package object routeguide {
 
-  val logger: Logger = Logger[this.type]
+  val logger = getLogger
 
   val features: List[Feature] = {
     logger.info("###### Loading route guide db...")

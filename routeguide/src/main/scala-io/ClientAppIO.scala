@@ -15,24 +15,26 @@
  */
 
 package routeguide
-package runtime
 
-import cats.implicits._
-import freestyle.implicits._
-import freestyle.config.implicits._
-import freestyle.rpc.server._
+import cats.effect.IO
+import org.log4s._
+import routeguide.clientIO.implicits._
+import routeguide.ClientProgram._
 
-import scala.util.{Failure, Success, Try}
+object ClientAppIO {
 
-trait ServerConf {
+  def main(args: Array[String]): Unit = {
 
-  def getConf(grpcConfigs: List[GrpcConfig]): ServerW =
-    BuildServerFromConfig[ServerConfig.Op]("rpc.server.port", grpcConfigs)
-      .interpret[Try] match {
-      case Success(c) => c
-      case Failure(e) =>
-        e.printStackTrace()
-        throw new RuntimeException("Unable to load the server configuration", e)
-    }
+    val logger = getLogger
+
+    logger.info(s"${Thread.currentThread().getName} Starting client, interpreting to Future ...")
+
+    clientProgram[IO].unsafeRunSync()
+
+    logger.info(s"${Thread.currentThread().getName} Finishing program interpretation ...")
+
+    (): Unit
+    System.in.read()
+  }
 
 }

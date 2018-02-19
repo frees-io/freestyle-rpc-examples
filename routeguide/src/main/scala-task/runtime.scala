@@ -16,24 +16,18 @@
 
 package routeguide
 
-import cats.implicits._
-import freestyle._
-import freestyle.implicits._
-import freestyle.async.implicits._
-import freestyle.rpc.client.implicits._
-import freestyle.asyncCatsEffect.implicits._
+import cats.~>
 import routeguide.handlers.RouteGuideClientHandler
 import routeguide.protocols.RouteGuideService
-import monix.eval.Task
-import monix.eval.instances.CatsAsyncInstances._
 import routeguide.runtime._
+import monix.eval.Task
 
-object clientT {
+object clientTask {
 
   trait Implicits extends RouteGuide with ClientConf {
 
     implicit val routeGuideServiceClient: RouteGuideService.Client[Task] =
-      RouteGuideService.client[Task](channel)
+      RouteGuideService.client[Task](channelFor)
 
     implicit val routeGuideClientHandler: RouteGuideClientHandler[Task] =
       new RouteGuideClientHandler[Task]

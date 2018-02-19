@@ -17,32 +17,13 @@
 package routeguide
 package runtime
 
-import cats.implicits._
-import freestyle._
-import freestyle.implicits._
-import freestyle.config.implicits._
-import freestyle.rpc.client._
-import io.grpc.ManagedChannel
-
-import scala.concurrent.Future
-import scala.util.{Failure, Success, Try}
+import cats.effect.IO
+import freestyle.rpc.ChannelFor
+import freestyle.rpc.client.config.ConfigForAddress
+import freestyle.tagless.config.implicits._
 
 trait ClientConf {
 
-  val channelFor: ManagedChannelFor =
-    ConfigForAddress[ChannelConfig.Op]("rpc.client.host", "rpc.client.port")
-      .interpret[Try] match {
-      case Success(c) => c
-      case Failure(e) =>
-        e.printStackTrace()
-        throw new RuntimeException("Unable to load the client configuration", e)
-    }
-
-  val channelConfigList: List[ManagedChannelConfig] = List(UsePlaintext(true))
-
-  val managedChannelInterpreter =
-    new ManagedChannelInterpreter[Future](channelFor, channelConfigList)
-
-  val channel: ManagedChannel = managedChannelInterpreter.build(channelFor, channelConfigList)
+  val channelFor: ChannelFor = ConfigForAddress[IO]("rpc.client.host", "rpc.client.port").unsafeRunSync()
 
 }

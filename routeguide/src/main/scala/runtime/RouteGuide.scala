@@ -17,42 +17,43 @@
 package routeguide
 package runtime
 
+import cats.effect.IO
 import cats.~>
-import cats.implicits._
-import freestyle.async.implicits._
-import freestyle.rpc.server._
+import freestyle.rpc.server.config.BuildServerFromConfig
+import freestyle.rpc.server.{AddService, GrpcConfig, ServerW}
+import freestyle.tagless.config.implicits._
+import monix.eval.Task
+import monix.execution.Scheduler
 import routeguide.handlers.RouteGuideServiceHandler
 import routeguide.protocols.RouteGuideService
 
-import scala.concurrent.{ExecutionContext, Future}
+trait RouteGuide {
 
-trait RouteGuideEC {
+  implicit val S: Scheduler = Scheduler.Implicits.global
 
-  implicit val ec: ExecutionContext = ExecutionContext.Implicits.global
-  implicit val S: monix.execution.Scheduler =
-    monix.execution.Scheduler.Implicits.global
+  implicit def T2IO(implicit S: Scheduler): Task ~> IO = new (Task ~> IO) {
+    override def apply[A](fa: Task[A]) = fa.toIO
+  }
+
+  implicit def T2Task(implicit S: Scheduler): Task ~> Task = new (Task ~> Task) {
+    override def apply[A](fa: Task[A]) = fa
+  }
 
 }
 
-trait RouteGuide extends RouteGuideEC
-
 object server {
 
-  trait Implicits extends RouteGuide with ServerConf {
+  trait Implicits extends RouteGuide {
 
-    import freestyle.rpc.server.handlers._
-    import freestyle.rpc.server.implicits._
-
-    implicit val routeGuideServiceHandler: RouteGuideService.Handler[Future] =
-      new RouteGuideServiceHandler[Future]
+    implicit val routeGuideServiceHandler: RouteGuideService[IO] =
+      new RouteGuideServiceHandler[IO]
 
     val grpcConfigs: List[GrpcConfig] = List(
-      AddService(RouteGuideService.bindService[RouteGuideService.Op, Future])
+      AddService(RouteGuideService.bindService[IO])
     )
 
-    implicit val grpcServerHandler: GrpcServer.Op ~> Future =
-      new GrpcServerHandler[Future] andThen
-        new GrpcKInterpreter[Future](getConf(grpcConfigs).server)
+    implicit val serverW: ServerW = BuildServerFromConfig[IO]("rpc.server.port", grpcConfigs).unsafeRunSync()
+
   }
 
   object implicits extends Implicits

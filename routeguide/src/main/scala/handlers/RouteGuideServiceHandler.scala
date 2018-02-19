@@ -1,34 +1,31 @@
 package routeguide
 package handlers
 
+import cats.{Applicative, ~>}
 import java.util.concurrent.atomic.AtomicReference
-
-import cats.~>
-import freestyle.Capture
-import journal.Logger
 import monix.eval.Task
 import monix.reactive.Observable
+import org.log4s._
 import routeguide.protocols._
 
 import scala.concurrent.duration.NANOSECONDS
 
-class RouteGuideServiceHandler[F[_]](implicit C: Capture[F], T2F: Task ~> F)
-    extends RouteGuideService.Handler[F] {
+class RouteGuideServiceHandler[F[_]](implicit A: Applicative[F], T2F: Task ~> F)
+    extends RouteGuideService[F] {
 
   // AtomicReference as an alternative to ConcurrentMap<Point, List<RouteNote>>?
   private val routeNotes: AtomicReference[Map[Point, List[RouteNote]]] =
     new AtomicReference[Map[Point, List[RouteNote]]](Map.empty)
 
-  val logger: Logger = Logger[this.type]
+  val logger = getLogger
 
-  override protected[this] def getFeature(point: protocols.Point): F[Feature] =
-    C.capture {
+  override def getFeature(point: protocols.Point): F[Feature] =
+    A.pure {
       logger.info(s"Fetching feature at ${point.pretty} ...")
       point.findFeatureIn(features)
     }
 
-  override protected[this] def listFeatures(
-      rectangle: protocols.Rectangle): F[Observable[Feature]] = {
+  override def listFeatures(rectangle: protocols.Rectangle): Observable[Feature] = {
     val left   = Math.min(rectangle.lo.longitude, rectangle.hi.longitude)
     val right  = Math.max(rectangle.lo.longitude, rectangle.hi.longitude)
     val top    = Math.max(rectangle.lo.latitude, rectangle.hi.latitude)
@@ -45,10 +42,10 @@ class RouteGuideServiceHandler[F[_]](implicit C: Capture[F], T2F: Task ~> F)
 
     logger.info(s"Listing features for $rectangle ...")
 
-    C.capture(observable)
+    observable
   }
 
-  override protected[this] def recordRoute(points: Observable[protocols.Point]): F[RouteSummary] =
+  override def recordRoute(points: Observable[protocols.Point]): F[RouteSummary] =
     // For each point after the first, add the incremental distance from the previous point to
     // the total distance value. We're starting
 
@@ -72,21 +69,19 @@ class RouteGuideServiceHandler[F[_]](implicit C: Capture[F], T2F: Task ~> F)
         .map(_._1)
     )
 
-  override protected[this] def routeChat(
-      routeNotes: Observable[protocols.RouteNote]): F[Observable[RouteNote]] =
-    C.capture {
-      routeNotes
-        .flatMap { note: RouteNote =>
-          logger.info(s"Got route note $note, adding it... ")
+  override def routeChat(
+      routeNotes: Observable[protocols.RouteNote]): Observable[RouteNote] =
+    routeNotes
+      .flatMap { note: RouteNote =>
+        logger.info(s"Got route note $note, adding it... ")
 
-          addNote(note)
-          Observable.fromIterable(getOrCreateNotes(note.location))
-        }
-        .onErrorHandle { e =>
-          logger.warn("routeChat cancelled", e)
-          throw e
-        }
-    }
+        addNote(note)
+        Observable.fromIterable(getOrCreateNotes(note.location))
+      }
+      .onErrorHandle { e =>
+        logger.warn(s"routeChat cancelled $e")
+        throw e
+      }
 
   private[this] def addNote(note: RouteNote): Unit =
     routeNotes.updateAndGet { notes: Map[Point, List[RouteNote]] =>

@@ -16,20 +16,23 @@
 
 package routeguide
 
-import freestyle._
+import cats.Monad
+import cats.syntax.flatMap._
+import cats.syntax.functor._
+import freestyle.tagless._
 import routeguide.protocols.Feature
 
-@free
-trait RouteGuideClient {
-  def getFeature(lat: Int, lon: Int): FS[Unit]
-  def listFeatures(lowLat: Int, lowLon: Int, hiLat: Int, hiLon: Int): FS[Unit]
-  def recordRoute(features: List[Feature], numPoints: Int): FS[Unit]
-  def routeChat: FS[Unit]
+@tagless
+trait RouteGuideClient[F[_]] {
+  def getFeature(lat: Int, lon: Int): F[Unit]
+  def listFeatures(lowLat: Int, lowLon: Int, hiLat: Int, hiLon: Int): F[Unit]
+  def recordRoute(features: List[Feature], numPoints: Int): F[Unit]
+  def routeChat: F[Unit]
 }
 
 object ClientProgram {
 
-  def clientProgram[M[_]](implicit APP: RouteGuideClient[M]): FreeS[M, Unit] = {
+  def clientProgram[M[_]: Monad](implicit APP: RouteGuideClient[M]): M[Unit] = {
     for {
       // Looking for a valid feature
       _ <- APP.getFeature(409146138, -746188906)
