@@ -1,8 +1,10 @@
 lazy val V = new {
-  lazy val frees    = "0.4.1"
-  lazy val freesRPC = "0.1.2"
-  lazy val circe    = "0.9.0-M1"
-  lazy val monix    = "3.0.0-M1"
+  lazy val circe          = "0.9.1"
+  lazy val frees          = "0.7.0"
+  lazy val freesRPC       = "0.11.1"
+  lazy val log4s          = "1.4.0"
+  lazy val logbackClassic = "1.2.3"
+  lazy val monix          = "3.0.0-M3"
 }
 
 lazy val `demo-routeguide` = project
@@ -12,14 +14,21 @@ lazy val `demo-routeguide` = project
   .settings(Seq(
     organization := "frees-io",
     organizationName := "47 Degrees",
-    scalaVersion := "2.12.3",
+    scalaVersion := "2.12.4",
     resolvers ++= Seq(
       Resolver.sonatypeRepo("releases"),
       Resolver.bintrayRepo("beyondthelines", "maven")
     ),
+    scalacOptions ++= Seq("-Ywarn-unused-import"),
     libraryDependencies ++= Seq(
-      "io.frees" %% "frees-rpc"               % V.freesRPC,
-      "io.frees" %% "frees-async-cats-effect" % V.frees,
+      "io.frees"       %% "frees-async-cats-effect" % V.frees,
+      "io.frees"       %% "frees-rpc-config"        % V.freesRPC,
+      "io.frees"       %% "frees-rpc-client-netty"  % V.freesRPC,
+      "io.frees"       %% "frees-core"              % V.frees,
+      "io.frees"       %% "frees-rpc-server"        % V.freesRPC,
+      "io.frees"       %% "frees-monix"             % V.frees,
+      "org.log4s"      %% "log4s"                   % V.log4s,
+      "ch.qos.logback" % "logback-classic"          % V.logbackClassic
     ) ++ Seq(
       "io.circe" %% "circe-core",
       "io.circe" %% "circe-generic",
@@ -28,7 +37,7 @@ lazy val `demo-routeguide` = project
   ): _*)
   .settings(
     unmanagedSourceDirectories in Compile ++= Seq(
-      baseDirectory.value / "src" / "main" / "scala-future",
+      baseDirectory.value / "src" / "main" / "scala-io",
       baseDirectory.value / "src" / "main" / "scala-task"
     )
   )
@@ -42,5 +51,5 @@ lazy val `demo-routeguide` = project
   )
 
 addCommandAlias("runServer", ";project demo-routeguide;runMain routeguide.ServerApp")
-addCommandAlias("runClientF", ";project demo-routeguide;runMain routeguide.ClientAppF")
-addCommandAlias("runClientT", ";project demo-routeguide;runMain routeguide.ClientAppT")
+addCommandAlias("runClientIO", ";project demo-routeguide;runMain routeguide.ClientAppIO")
+addCommandAlias("runClientTask", ";project demo-routeguide;runMain routeguide.ClientAppTask")

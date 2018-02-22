@@ -16,27 +16,22 @@
 
 package routeguide
 
-import freestyle._
-import monix.eval.Task
-import routeguide.clientT.implicits._
+import cats.effect.IO
+import routeguide.handlers.RouteGuideClientHandler
+import routeguide.protocols.RouteGuideService
+import routeguide.runtime._
 
-import scala.concurrent.Await
-import scala.concurrent.duration._
+object clientIO {
 
-import routeguide.ClientProgram._
+  trait Implicits extends RouteGuide with ClientConf {
 
-object ClientAppT {
+    implicit val routeGuideServiceClient: RouteGuideService.Client[IO] =
+      RouteGuideService.client[IO](channelFor)
 
-  def main(args: Array[String]): Unit = {
-
-    logger.info(s"${Thread.currentThread().getName} Starting client, interpreting to Task ...")
-
-    Await.result(clientProgram[RouteGuideClient.Op].interpret[Task].runAsync, Duration.Inf)
-
-    logger.info(s"${Thread.currentThread().getName} Finishing program interpretation ...")
-
-    (): Unit
-    System.in.read()
+    implicit val routeGuideClientHandler: RouteGuideClientHandler[IO] =
+      new RouteGuideClientHandler[IO]
   }
+
+  object implicits extends Implicits
 
 }

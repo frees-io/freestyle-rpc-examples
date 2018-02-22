@@ -16,7 +16,6 @@
 
 package routeguide
 
-import freestyle._
 import freestyle.rpc.protocol._
 import monix.reactive.Observable
 
@@ -87,10 +86,8 @@ object protocols {
   @message
   case class RouteSummary(point_count: Int, feature_count: Int, distance: Int, elapsed_time: Int)
 
-  @free
   @service
-  @debug
-  trait RouteGuideService {
+  trait RouteGuideService[F[_]] {
 
     /**
      * A simple RPC.
@@ -101,7 +98,7 @@ object protocols {
      * @param point Position.
      * @return Feature at a given point.
      */
-    @rpc def getFeature(point: Point): FS[Feature]
+    @rpc(Protobuf) def getFeature(point: Point): F[Feature]
 
     /**
      * A server-to-client streaming RPC.
@@ -114,9 +111,9 @@ object protocols {
      * @param rectangle Rectangle.
      * @return Features available within the given Rectangle, in a streaming fashion.
      */
-    @rpc
+    @rpc(Protobuf)
     @stream[ResponseStreaming.type]
-    def listFeatures(rectangle: Rectangle): FS[Observable[Feature]]
+    def listFeatures(rectangle: Rectangle): Observable[Feature]
 
     /**
      * A client-to-server streaming RPC.
@@ -127,9 +124,9 @@ object protocols {
      * @param points Stream of points.
      * @return RouteSummary when traversal is completed.
      */
-    @rpc
+    @rpc(Protobuf)
     @stream[RequestStreaming.type]
-    def recordRoute(points: Observable[Point]): FS[RouteSummary]
+    def recordRoute(points: Observable[Point]): F[RouteSummary]
 
     /**
      * A Bidirectional streaming RPC.
@@ -140,9 +137,9 @@ object protocols {
      * @param routeNotes Stream of RouteNotes.
      * @return Stream of RouteNotes.
      */
-    @rpc
+    @rpc(Protobuf)
     @stream[BidirectionalStreaming.type]
-    def routeChat(routeNotes: Observable[RouteNote]): FS[Observable[RouteNote]]
+    def routeChat(routeNotes: Observable[RouteNote]): Observable[RouteNote]
   }
 
 }

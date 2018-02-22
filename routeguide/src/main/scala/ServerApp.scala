@@ -16,24 +16,21 @@
 
 package routeguide
 
-import cats.implicits._
-import freestyle.rpc.server.GrpcServerApp
+import cats.effect.IO
 import freestyle.rpc.server.implicits._
+import org.log4s._
 import routeguide.runtime.server.implicits._
-import journal.Logger
-
-import scala.concurrent.Await
-import scala.concurrent.duration.Duration
 
 object ServerApp {
 
-  val logger: Logger = Logger[this.type]
+  val logger = getLogger
 
   def main(args: Array[String]): Unit = {
 
     logger.info(s"Server is starting ...")
 
-    Await.result(server[GrpcServerApp.Op].bootstrapFuture, Duration.Inf)
+    server[IO].unsafeRunSync()
+
   }
 
 }

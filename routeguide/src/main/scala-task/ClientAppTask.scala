@@ -16,25 +16,22 @@
 
 package routeguide
 
-import cats.implicits._
-import freestyle._
-import journal.Logger
-import routeguide.clientF.implicits._
-
+import monix.eval.Task
+import org.log4s._
+import routeguide.ClientProgram._
+import routeguide.clientTask.implicits._
 import scala.concurrent.Await
 import scala.concurrent.duration._
-import scala.concurrent.Future
-import routeguide.ClientProgram._
 
-object ClientAppF {
+object ClientAppTask {
 
   def main(args: Array[String]): Unit = {
 
-    val logger: Logger = Logger[this.type]
+    val logger = getLogger
 
-    logger.info(s"${Thread.currentThread().getName} Starting client, interpreting to Future ...")
+    logger.info(s"${Thread.currentThread().getName} Starting client, interpreting to Task ...")
 
-    Await.result(clientProgram[RouteGuideClient.Op].interpret[Future], Duration.Inf)
+    Await.result(clientProgram[Task].runAsync, Duration.Inf)
 
     logger.info(s"${Thread.currentThread().getName} Finishing program interpretation ...")
 
