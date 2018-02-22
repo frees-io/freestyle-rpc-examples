@@ -19,7 +19,7 @@ lazy val `demo-routeguide` = project
       Resolver.sonatypeRepo("releases"),
       Resolver.bintrayRepo("beyondthelines", "maven")
     ),
-    scalacOptions := Seq("-Ywarn-unused-import"),
+    scalacOptions ++= Seq("-Ywarn-unused-import"),
     libraryDependencies ++= Seq(
       "io.frees"       %% "frees-async-cats-effect" % V.frees,
       "io.frees"       %% "frees-rpc-config"        % V.freesRPC,
