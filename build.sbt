@@ -1,7 +1,7 @@
 lazy val V = new {
   lazy val circe          = "0.9.1"
   lazy val frees          = "0.7.0"
-  lazy val freesRPC       = "0.11.0"
+  lazy val freesRPC       = "0.11.1"
   lazy val log4s          = "1.4.0"
   lazy val logbackClassic = "1.2.3"
   lazy val monix          = "3.0.0-M3"
@@ -19,6 +19,7 @@ lazy val `demo-routeguide` = project
       Resolver.sonatypeRepo("releases"),
       Resolver.bintrayRepo("beyondthelines", "maven")
     ),
+    scalacOptions := Seq("-Ywarn-unused-import"),
     libraryDependencies ++= Seq(
       "io.frees"       %% "frees-async-cats-effect" % V.frees,
       "io.frees"       %% "frees-rpc-config"        % V.freesRPC,

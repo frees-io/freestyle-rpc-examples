@@ -16,7 +16,6 @@
 
 package routeguide
 
-import cats.~>
 import routeguide.handlers.RouteGuideClientHandler
 import routeguide.protocols.RouteGuideService
 import routeguide.runtime._

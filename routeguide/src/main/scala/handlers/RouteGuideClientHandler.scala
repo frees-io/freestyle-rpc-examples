@@ -2,22 +2,12 @@ package routeguide
 package handlers
 
 import cats._
-import cats.effect.Effect
 import cats.implicits._
 import io.grpc.{Status, StatusRuntimeException}
 import monix.eval.Task
 import monix.reactive.Observable
 import org.log4s._
 import routeguide.protocols._
-import freestyle.tagless._
-import freestyle.tagless.async.implicits._
-import freestyle.tagless.config.implicits._
-import freestyle.async.catsEffect.implicits._
-import freestyle.rpc.client._
-import freestyle.rpc.client.config._
-import freestyle.rpc.client.implicits._
-import monix.execution.Scheduler
-
 import scala.concurrent.duration._
 
 class RouteGuideClientHandler[F[_]: Monad](
