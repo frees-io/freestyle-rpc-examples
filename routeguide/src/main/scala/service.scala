@@ -19,9 +19,12 @@ package routeguide
 import freestyle.rpc.protocol._
 import monix.reactive.Observable
 
-@option(name = "java_package", value = "routeguide", quote = true)
-@option(name = "java_multiple_files", value = "true", quote = false)
-@option(name = "java_outer_classname", value = "RouteGuide", quote = true)
+@outputPackage("routeguide")
+@option("java_multiple_files", true)
+@option("java_package", "io.grpc.examples.routeguide")
+@option("java_outer_classname", "RouteGuideProto")
+@option("objc_class_prefix", "RTG")
+// Based on https://github.com/grpc/grpc-java/blob/v1.10.x/examples/src/main/proto/route_guide.proto
 object protocols {
 
   /**

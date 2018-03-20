@@ -1,2 +1,5 @@
-resolvers += Resolver.sonatypeRepo("releases")
-addSbtPlugin("io.frees" % "sbt-frees-protogen" % "0.0.14")
+resolvers ++= Seq(
+  Resolver.sonatypeRepo("releases"),
+  Resolver.bintrayRepo("beyondthelines", "maven")
+)
+addSbtPlugin("io.frees" % "sbt-frees-rpc-idlgen" % "0.12.0")
