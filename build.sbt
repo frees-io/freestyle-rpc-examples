@@ -13,10 +13,6 @@ lazy val `demo-routeguide` = project.in(file("routeguide")).settings(
   organization := "frees-io",
   organizationName := "47 Degrees",
   scalaVersion := "2.12.4",
-  resolvers ++= Seq(
-    Resolver.sonatypeRepo("releases"),
-    Resolver.bintrayRepo("beyondthelines", "maven")
-  ),
   libraryDependencies ++= Seq(
     "io.frees"       %% "frees-rpc-config"       % V.freesRPC,
     "io.frees"       %% "frees-rpc-client-netty" % V.freesRPC,
