@@ -1,3 +1,4 @@
+:warning: **Note: this project is deprecated and has been integrated into the [frees-rpc](https://github.com/frees-io/freestyle-rpc/tree/master/modules/examples) codebase.**
 
 [comment]: # (Start Badges)
 
